@@ -457,10 +457,10 @@ extension WebDAVFileProvider: ExtendedFileProvider {
 // MARK: WEBDAV XML response implementation
 
 public struct DavResponse {
-    let href: URL
-    let hrefString: String
-    let status: Int?
-    let prop: [String: String]
+    public let href: URL
+    public let hrefString: String
+    public let status: Int?
+    public let prop: [String: String]
     
     static let urlAllowed = CharacterSet(charactersIn: " ").inverted
     
