@@ -321,7 +321,7 @@ open class WebDAVFileProvider: HTTPFileProvider, FileProviderSharing {
         })
     }
     
-    override func request(for operation: FileOperationType, overwrite: Bool = true, attributes: [URLResourceKey: Any] = [:]) -> URLRequest {
+    override open func request(for operation: FileOperationType, overwrite: Bool = true, attributes: [URLResourceKey: Any] = [:]) -> URLRequest {
         let method: String
         let url: URL
         let sourceURL = self.url(of: operation.source)
@@ -373,11 +373,11 @@ open class WebDAVFileProvider: HTTPFileProvider, FileProviderSharing {
         return request
     }
     
-    override func serverError(with code: FileProviderHTTPErrorCode, path: String?, data: Data?) -> FileProviderHTTPError {
+    override open func serverError(with code: FileProviderHTTPErrorCode, path: String?, data: Data?) -> FileProviderHTTPError {
         return FileProviderWebDavError(code: code, path: path ?? "", serverDescription:  data.flatMap({ String(data: $0, encoding: .utf8) }), url: self.url(of: path ?? ""))
     }
     
-    override func multiStatusError(operation: FileOperationType, data: Data) -> FileProviderHTTPError? {
+    override open func multiStatusError(operation: FileOperationType, data: Data) -> FileProviderHTTPError? {
         let xresponses = DavResponse.parse(xmlResponse: data, baseURL: self.baseURL)
         for xresponse in xresponses where (xresponse.status ?? 0) >= 300 {
             let code = xresponse.status.flatMap { FileProviderHTTPErrorCode(rawValue: $0) } ?? .internalServerError
@@ -464,7 +464,7 @@ public struct DavResponse {
     
     static let urlAllowed = CharacterSet(charactersIn: " ").inverted
     
-    init? (_ node: AEXMLElement, baseURL: URL?) {
+    public init? (_ node: AEXMLElement, baseURL: URL?) {
         
         func standardizePath(_ str: String) -> String {
             let trimmedStr = str.hasPrefix("/") ? String(str[str.index(after: str.startIndex)...]) : str
@@ -538,7 +538,7 @@ public struct DavResponse {
         self.prop = propDic
     }
     
-    static func parse(xmlResponse: Data, baseURL: URL?) -> [DavResponse] {
+    public static func parse(xmlResponse: Data, baseURL: URL?) -> [DavResponse] {
         guard let xml = try? AEXMLDocument(xml: xmlResponse) else { return [] }
         var result = [DavResponse]()
         var rootnode = xml.root
@@ -561,7 +561,7 @@ public struct DavResponse {
 
 /// Containts path, url and attributes of a WebDAV file or resource.
 public final class WebDavFileObject: FileObject {
-    init(_ davResponse: DavResponse) {
+    public init(_ davResponse: DavResponse) {
         let href = davResponse.href
         let name = davResponse.prop["displayname"] ?? davResponse.href.lastPathComponent
         let relativePath = href.relativePath
