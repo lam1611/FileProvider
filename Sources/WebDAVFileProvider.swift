@@ -578,7 +578,7 @@ public final class WebDavFileObject: FileObject {
     }
     
     /// MIME type of the file.
-    public var contentType: ContentMIMEType {
+    public internal(set) var contentType: ContentMIMEType {
         get {
             return (allValues[.mimeTypeKey] as? String).flatMap(ContentMIMEType.init(rawValue:)) ?? .stream
         }
@@ -588,7 +588,7 @@ public final class WebDavFileObject: FileObject {
     }
     
     /// HTTP E-Tag, can be used to mark changed files.
-    public var entryTag: String? {
+    public internal(set) var entryTag: String? {
         get {
             return allValues[.entryTagKey] as? String
         }
@@ -597,7 +597,7 @@ public final class WebDavFileObject: FileObject {
         }
     }
     
-    class func resourceKeyToDAVProp(_ key: URLResourceKey) -> String? {
+    public class func resourceKeyToDAVProp(_ key: URLResourceKey) -> String? {
         switch key {
         case URLResourceKey.fileSizeKey:
             return "getcontentlength"
@@ -621,7 +621,7 @@ public final class WebDavFileObject: FileObject {
         }
     }
     
-    class func propString(_ keys: [URLResourceKey]) -> String {
+    public class func propString(_ keys: [URLResourceKey]) -> String {
         var propKeys = ""
         for item in keys {
             if let prop = WebDavFileObject.resourceKeyToDAVProp(item) {
@@ -636,7 +636,7 @@ public final class WebDavFileObject: FileObject {
         return propKeys
     }
     
-    class func xmlProp(_ keys: [URLResourceKey]) -> Data {
+    public class func xmlProp(_ keys: [URLResourceKey]) -> Data {
         return "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n<D:propfind xmlns:D=\"DAV:\">\n\(WebDavFileObject.propString(keys))\n</D:propfind>".data(using: .utf8)!
     }
 }
