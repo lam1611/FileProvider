@@ -567,7 +567,7 @@ public final class WebDavFileObject: FileObject {
         let relativePath = href.relativePath
         let path = relativePath.hasPrefix("/") ? relativePath : ("/" + relativePath)
         super.init(url: href, name: name, path: path)
-        self.size = Int64(davResponse.prop["getcontentlength"] ?? "-1") ?? NSURLSessionTransferSizeUnknown
+        self.size = Int64(davResponse.prop["getcontentlength"] ?? davResponse.prop["size"] ?? "-1") ?? NSURLSessionTransferSizeUnknown
         self.creationDate = davResponse.prop["creationdate"].flatMap { Date(rfcString: $0) }
         self.modifiedDate = davResponse.prop["getlastmodified"].flatMap { Date(rfcString: $0) }
         self.contentType = davResponse.prop["getcontenttype"].flatMap(ContentMIMEType.init(rawValue:)) ?? .stream
