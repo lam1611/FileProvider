@@ -29,6 +29,8 @@ open class WebDAVFileProvider: HTTPFileProvider, FileProviderSharing {
     /// If the server uses OAuth authentication, credential must be set with token as `password`, like Dropbox.
     public var credentialType: URLRequest.AuthenticationType = .digest
     
+    public var timeoutInterval: TimeInterval = -1
+    
     /**
      Initializes WebDAV provider.
      
@@ -366,6 +368,11 @@ open class WebDAVFileProvider: HTTPFileProvider, FileProviderSharing {
         request.httpMethod = method
         request.setValue(authentication: credential, with: credentialType)
         request.setValue(overwrite ? "T" : "F", forHTTPHeaderField: "Overwrite")
+        
+        if timeoutInterval != -1 {
+            request.timeoutInterval = timeoutInterval
+        }
+        
         if let dest = operation.destination, !dest.hasPrefix("file://") {
             request.setValue(self.url(of:dest).absoluteString, forHTTPHeaderField: "Destination")
         }
