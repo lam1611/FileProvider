@@ -744,7 +744,7 @@ public final class WebDavSharedObject: NSObject {
     public internal(set) var sharePermission: Int
     
     /// Share link of the file.
-    public internal(set) var shareURL: String
+    public internal(set) var shareURL: String?
     
     /// Share time of the file.
     public internal(set) var shareTimeInterval: TimeInterval
@@ -770,7 +770,7 @@ public final class WebDavSharedObject: NSObject {
         self.shareID = davResponse.prop["id"]!
         self.shareType = Int(davResponse.prop["share_type"] ?? "3") ?? 3
         self.sharePermission = Int(davResponse.prop["permissions"] ?? "1") ?? 1
-        self.shareURL = davResponse.prop["url"]!
+        self.shareURL = davResponse.prop["url"]
         self.shareTimeInterval = Double(davResponse.prop["stime"] ?? "-1") ?? -1
         self.ownerID = davResponse.prop["uid_owner"]!
         self.ownerDisplayName = davResponse.prop["displayname_owner"]!
