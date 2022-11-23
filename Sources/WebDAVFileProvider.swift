@@ -596,6 +596,7 @@ public final class WebDavFileObject: FileObject {
         self.isFavorite = Int(davResponse.prop["favorite"] ?? "0") == 1
         self.shareType = Int(davResponse.prop["share-type"] ?? "")
         self.sharePermission = Int(davResponse.prop["share-permissions"] ?? "")
+        self.isShared = (davResponse.prop["mount-type"] ?? "") == "shared"
         self.ownerID = davResponse.prop["owner-id"]
         self.ownerDisplayName = davResponse.prop["owner-display-name"]
         self.deletionTime = Double(davResponse.prop["trashbin-deletion-time"] ?? "")
@@ -641,9 +642,8 @@ public final class WebDavFileObject: FileObject {
     /// Share link of the file.
     public var shareURL: String?
     
-    public var isShared: Bool {
-        return shareType != nil
-    }
+    /// Share state of the file.
+    public internal(set) var isShared: Bool = false
     
     public internal(set) var deletionTime: Double?
     
