@@ -746,6 +746,9 @@ public final class WebDavSharedObject: NSObject {
     /// Share link of the file.
     public internal(set) var shareURL: String?
     
+    /// The user that the file is shared to.
+    public internal(set) var shareWith: String?
+    
     /// Share time of the file.
     public internal(set) var shareTimeInterval: TimeInterval
     
@@ -771,11 +774,96 @@ public final class WebDavSharedObject: NSObject {
         self.shareType = Int(davResponse.prop["share_type"] ?? "3") ?? 3
         self.sharePermission = Int(davResponse.prop["permissions"] ?? "1") ?? 1
         self.shareURL = davResponse.prop["url"]
+        self.shareWith = davResponse.prop["share_with"]
         self.shareTimeInterval = Double(davResponse.prop["stime"] ?? "-1") ?? -1
         self.ownerID = davResponse.prop["uid_owner"]!
         self.ownerDisplayName = davResponse.prop["displayname_owner"]!
         self.path = davResponse.prop["path"]!
         self.type = davResponse.prop["item_type"]!
+        self.contentType = ContentMIMEType(rawValue: davResponse.prop["mimetype"]!)
+        super.init()
+    }
+}
+
+// MARK: WEBDAV recent XML response implementation
+
+public struct DavRecentResponse {
+    
+    public let prop: [String: String]
+    
+    public init? (_ node: AEXMLElement, baseURL: URL?) {
+        var propDic = [String: String]()
+        
+        DavResponse.parseNodeChildren(node.children, to: &propDic)
+        
+        self.prop = propDic
+    }
+    
+    public static func parse(xmlResponse: Data, baseURL: URL?, contentTag: String = "element") -> [DavRecentResponse] {
+        guard let xml = try? AEXMLDocument(xml: xmlResponse) else { return [] }
+        var result = [DavRecentResponse]()
+        var rootnode = xml.root
+        var responsetag = contentTag
+        for node in rootnode.all ?? [] where node.name.lowercased().hasSuffix("ocs") {
+            rootnode = node
+        }
+        for node in rootnode.children where node.name.lowercased().hasSuffix("data") {
+            rootnode = node
+        }
+        for node in rootnode.children where node.name.lowercased().hasSuffix("files") {
+            rootnode = node
+        }
+        for node in rootnode.children where node.name.lowercased().hasSuffix("element") {
+            responsetag = node.name
+            break
+        }
+        for responseNode in rootnode[responsetag].all ?? [] {
+            if let davResponse = DavRecentResponse(responseNode, baseURL: baseURL) {
+                result.append(davResponse)
+            }
+        }
+        return result
+    }
+}
+
+/// Containts path, url and attributes of a WebDAV file or resource.
+public final class WebDavRecentObject: NSObject {
+    
+    /// Recent id of the file.
+    public internal(set) var recentID: String
+    
+    /// Share permission of the file.
+    public internal(set) var sharePermission: Int
+    
+    /// Recent time of the file.
+    public internal(set) var recentTimeInterval: TimeInterval
+    
+    public internal(set) var fileName: String
+    
+    /// Path of the file.
+    public internal(set) var path: String
+    
+    /// Type of the file.
+    public internal(set) var type: String
+    
+    /// Size of the file.
+    public internal(set) var size: String
+    
+    /// MIME type of the file.
+    public internal(set) var contentType: ContentMIMEType
+    
+    public var recentTime: Date? {
+        return (recentTimeInterval > 0) ? Date(timeIntervalSince1970: recentTimeInterval / 1000) : nil
+    }
+    
+    public init(_ davResponse: DavRecentResponse) {
+        self.recentID = davResponse.prop["id"]!
+        self.sharePermission = Int(davResponse.prop["permissions"] ?? "1") ?? 1
+        self.recentTimeInterval = Double(davResponse.prop["mtime"] ?? "-1") ?? -1
+        self.fileName = davResponse.prop["name"]!
+        self.path = davResponse.prop["path"]!
+        self.type = davResponse.prop["type"]!
+        self.size = davResponse.prop["size"]!
         self.contentType = ContentMIMEType(rawValue: davResponse.prop["mimetype"]!)
         super.init()
     }
