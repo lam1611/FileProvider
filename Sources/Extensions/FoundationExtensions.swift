@@ -393,6 +393,12 @@ public extension URLRequest {
         
         self.setValue(jsonString, forHTTPHeaderField: "Dropbox-API-Arg")
     }
+    
+    mutating func setValues(forHTTPHeaderFields fields: [String : String]) {
+        for (key, value) in fields {
+            self.setValue(value, forHTTPHeaderField: key)
+        }
+    }
 }
 
 internal extension CharacterSet {
