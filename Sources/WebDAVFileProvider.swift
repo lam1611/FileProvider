@@ -650,6 +650,16 @@ public final class WebDavFileObject: FileObject {
     /// Share state of the file.
     public internal(set) var isShared: Bool = false
     
+    /// Invited shares of the file.
+    public var invitedShares: [WebDavSharedObject] = []
+    
+    public var invitedPeople: [String] {
+        return invitedShares.compactMap { $0.shareWith }
+    }
+    
+    /// Public share of the file.
+    public var publicShare: WebDavSharedObject?
+    
     public internal(set) var deletionTime: Double?
     
     public internal(set) var originalLocation: String?
