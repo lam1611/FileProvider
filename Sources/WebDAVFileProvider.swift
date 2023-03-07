@@ -653,10 +653,6 @@ public final class WebDavFileObject: FileObject {
     /// Invited shares of the file.
     public var invitedShares: [WebDavSharedObject] = []
     
-    public var invitedPeople: [String] {
-        return invitedShares.compactMap { $0.shareWith }
-    }
-    
     /// Public share of the file.
     public var publicShare: WebDavSharedObject?
     
@@ -764,6 +760,9 @@ public final class WebDavSharedObject: NSObject {
     /// The user that the file is shared to.
     public internal(set) var shareWith: String?
     
+    /// The user that the file is shared to.
+    public internal(set) var shareWithDisplayName: String?
+    
     /// Share time of the file.
     public internal(set) var shareTimeInterval: TimeInterval
     
@@ -790,6 +789,7 @@ public final class WebDavSharedObject: NSObject {
         self.sharePermission = Int(davResponse.prop["permissions"] ?? "1") ?? 1
         self.shareURL = davResponse.prop["url"]
         self.shareWith = davResponse.prop["share_with"]
+        self.shareWithDisplayName = davResponse.prop["share_with_displayname"]
         self.shareTimeInterval = Double(davResponse.prop["stime"] ?? "-1") ?? -1
         self.ownerID = davResponse.prop["uid_owner"]!
         self.ownerDisplayName = davResponse.prop["displayname_owner"]!
