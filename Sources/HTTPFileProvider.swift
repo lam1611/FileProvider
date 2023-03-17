@@ -129,6 +129,23 @@ open class HTTPFileProvider: NSObject, FileProviderBasicRemote, FileProviderOper
         return true
     }
     
+    open func invalidateSession() {
+        _session?.invalidateAndCancel()
+        _session = nil
+    }
+    
+    open func configSession() {
+        if _session == nil {
+            self.sessionDelegate = SessionDelegate(fileProvider: self)
+            let config = URLSessionConfiguration.default
+            config.urlCache = cache
+            config.requestCachePolicy = .returnCacheDataElseLoad
+            _session = URLSession(configuration: config, delegate: sessionDelegate as URLSessionDelegate?, delegateQueue: self.operation_queue)
+            _session.sessionDescription = UUID().uuidString
+            initEmptySessionHandler(_session.sessionDescription!)
+        }
+    }
+    
     open func copy(with zone: NSZone? = nil) -> Any {
         fatalError("HTTPFileProvider is an abstract class. Please implement \(#function) in subclass.")
     }
