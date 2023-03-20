@@ -30,7 +30,7 @@ open class WebDAVFileProvider: HTTPFileProvider, FileProviderSharing {
     public var credentialType: URLRequest.AuthenticationType = .digest
     
     public var timeoutInterval: TimeInterval = -1
-    public var headerFields: [String : String] = [:]
+    public var headerFields: [String : String]?
     
     /**
      Initializes WebDAV provider.
@@ -369,12 +369,13 @@ open class WebDAVFileProvider: HTTPFileProvider, FileProviderSharing {
         request.httpMethod = method
         request.setValue(authentication: credential, with: credentialType)
         request.setValue(overwrite ? "T" : "F", forHTTPHeaderField: "Overwrite")
-        request.setValues(forHTTPHeaderFields: headerFields)
         
+        if let headerFields = headerFields {
+            request.setValues(forHTTPHeaderFields: headerFields)
+        }
         if timeoutInterval != -1 {
             request.timeoutInterval = timeoutInterval
         }
-        
         if let dest = operation.destination, !dest.hasPrefix("file://") {
             request.setValue(self.url(of:dest).absoluteString, forHTTPHeaderField: "Destination")
         }
